@@ -15,8 +15,6 @@ namespace Toolkit
 		static bool grab = false;
         static Texture toolboxIcon;
 
-		private static ShapePropertyEditor propertyEditor = null;
-
         static DrawCameraMode[] modes;
 
         static float progress = 1f;
@@ -51,7 +49,7 @@ namespace Toolkit
                 toolbox = EditorWindow.GetWindow<Toolbox>();
                 if (toolbox != null)
                 {
-					sceneView.LookAt(toolbox.gizmoPosition);
+					sceneView.LookAt(Toolbox.gizmoPosition);
                 }
 
             }
@@ -59,7 +57,7 @@ namespace Toolkit
 			{
 				if (Selection.activeGameObject != null)
 				{
-					Selection.activeGameObject.transform.position = toolbox.gizmoPosition;
+					Selection.activeGameObject.transform.position = Toolbox.gizmoPosition;
 				}
 
 			}
@@ -67,7 +65,7 @@ namespace Toolkit
             {
                 if (Selection.activeGameObject != null)
                 {
-                    toolbox.gizmoPosition = Selection.activeGameObject.transform.position;
+                    Toolbox.gizmoPosition = Selection.activeGameObject.transform.position;
                 }
 
             }
@@ -76,12 +74,12 @@ namespace Toolkit
             {
                 int gridSize = EditorPrefs.GetInt("Toolkit_GridSize", 1);
 
-                Vector3 pos = toolbox.gizmoPosition;
+                Vector3 pos = Toolbox.gizmoPosition;
 
                 pos.x = EditorHelper.snap((int)pos.x, gridSize);
                 pos.z = EditorHelper.snap((int)pos.z, gridSize);
 
-                toolbox.gizmoPosition = pos;
+                Toolbox.gizmoPosition = pos;
             }
             else if (obj.ToString().Equals("mergeObjects"))
             {
@@ -216,9 +214,6 @@ namespace Toolkit
 				Selection.activeGameObject.transform.localPosition = pos;
 			}
 
-
-			if (propertyEditor == null)
-				propertyEditor = ScriptableObject.CreateInstance<ShapePropertyEditor>();
 
 			Handles.BeginGUI();
 			int w = SceneView.currentDrawingSceneView.camera.pixelWidth / 4;

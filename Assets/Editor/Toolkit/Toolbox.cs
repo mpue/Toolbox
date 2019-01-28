@@ -10,7 +10,7 @@ namespace Toolkit
     public class Toolbox : EditorWindow
     {
 
-        public Vector3 gizmoPosition = new Vector3(0, 0, 0);
+        public static Vector3 gizmoPosition = new Vector3(0, 0, 0);
 
         private static Vector2 scrollPosition = Vector2.zero;
 
@@ -18,21 +18,53 @@ namespace Toolkit
         private static int selected;
 
 
-		private static int selectedPath = 0;
+        private static int selectedPath = 0;
         private static bool autoRefresh = false;
 
-        private ObjectCloner objectCloner = null;
-        private FilterSelector selector = null;
-        private ColorSelector colorSelector = null;
-        private WaypointGenerator waypointGenerator = null;
+        private static ObjectCloner objectCloner = null;
+        private static FilterSelector selector = null;
+        private static ColorSelector colorSelector = null;
+        private static WaypointGenerator waypointGenerator = null;
 
-        
+        private static List<GUIContent> contents = null;
+
+        private static GUIContent _viewToCursorContent = null;
+        private static GUIContent _selectedToCursorContent = null;
+        private static GUIContent _cursorToSelectedContent = null;
+        private static GUIContent _cursorToGridContent = null;
+
+        static Toolbox() {
+            contents = new List<GUIContent>();
+
+            AddContent("cursor","Snap view to cursor");
+            AddContent("snap_selected", "Snap selected to cursor");
+            AddContent("snap_cursor_selected", "Snap cursor to selected");
+            AddContent("cursor_grid", "Snap cursor to grid");
+            AddContent("merge", "Merge selected");
+            AddContent("activate_children", "Activate children");
+            AddContent("disable", "Disable");
+            AddContent("object_placer", "Place objects");
+            AddContent("filter", "Filter select");
+            AddContent("batch", "Shader batch modify");
+            AddContent("path", "Waypoint from OBJ");
+        }
+
+        private static void AddContent(string icon, string hint)
+        {
+            contents.Add(new GUIContent((Texture)Resources.Load(icon),hint));
+        }
+
         [MenuItem("Window/Toolbox")]
         private static void OpenWindow()
         {
-            Toolbox window = GetWindow<Toolbox>();
+            // Toolbox window = GetWindow<Toolbox>();
             // window.titleContent = new GUIContent("Toolbox", (Texture)Resources.Load("wrench"));
 
+            // Remove delegate listener if it has previously
+            // been assigned.
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+            // Add (or re-add) the delegate.
+            SceneView.onSceneGUIDelegate += OnSceneGUI;
         }
         
 
@@ -40,11 +72,6 @@ namespace Toolkit
         {
             autoRefresh = EditorPrefs.GetBool("Toolkit_AutoRefresh", false);
 
-            // Remove delegate listener if it has previously
-            // been assigned.
-            SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
-            // Add (or re-add) the delegate.
-            SceneView.onSceneGUIDelegate += this.OnSceneGUI;
         }
 
         void OnFocus()
@@ -53,18 +80,19 @@ namespace Toolkit
 
         void OnDestroy()
         {
-            SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
         }
 
         private void OnDisable()
         {
-			SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+			SceneView.onSceneGUIDelegate -= OnSceneGUI;
 			SceneView.RepaintAll();
 
         }
 
-        void OnSceneGUI(SceneView sceneView)
+        static void OnSceneGUI(SceneView sceneView)
         {
+            createToolbar();
 
             Event e = Event.current;
 
@@ -119,7 +147,9 @@ namespace Toolkit
             
         }
 
-        void drawGizmo(float size)
+
+
+        static void drawGizmo(float size)
         {
 
             Handles.color = Color.black;
@@ -156,17 +186,22 @@ namespace Toolkit
 
         }
 
-        void OnGUI()
+        static void createToolbar()
         {
 
             SceneView sceneView = SceneView.lastActiveSceneView;
 
-            if (GUILayout.Button("View to cursor"))
+            Handles.BeginGUI();
+            GUILayout.BeginVertical();
+            
+
+
+            if (GUILayout.Button(contents[0], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 sceneView.LookAt(gizmoPosition);
             }
 
-            else if (GUILayout.Button("Snap selected to cursor"))
+            else if (GUILayout.Button(contents[1], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (Selection.activeGameObject != null)
                 {
@@ -175,7 +210,7 @@ namespace Toolkit
 
             }
 
-            else if (GUILayout.Button("Snap cursor to selected"))
+            else if (GUILayout.Button(contents[2], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (Selection.activeGameObject != null)
                 {
@@ -184,7 +219,7 @@ namespace Toolkit
 
             }
 
-            else if (GUILayout.Button("Snap cursor to grid"))
+            else if (GUILayout.Button(contents[3], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 int gridSize = EditorPrefs.GetInt("Toolkit_GridSize", 1);
 
@@ -196,7 +231,7 @@ namespace Toolkit
                 gizmoPosition = pos;
             }
 
-            else if (GUILayout.Button("Merge selected"))
+            else if (GUILayout.Button(contents[4], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (Selection.gameObjects.Length > 0)
                 {
@@ -204,17 +239,17 @@ namespace Toolkit
                 }
             }
 
-            else if (GUILayout.Button("Activate children"))
+            else if (GUILayout.Button(contents[5], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 Selection.activeGameObject.SetActive(true);
             }
 
-            else if (GUILayout.Button("Deactivate"))
+            else if (GUILayout.Button(contents[6], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 Selection.activeGameObject.SetActive(false);
             }
 
-            else if (GUILayout.Button("Object placer"))
+            else if (GUILayout.Button(contents[7], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (objectCloner == null)
                 {
@@ -224,7 +259,7 @@ namespace Toolkit
             }
 
 
-            else if (GUILayout.Button("Filter selector"))
+            else if (GUILayout.Button(contents[8], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (selector == null)
                 {
@@ -233,7 +268,7 @@ namespace Toolkit
                 selector.Show();
             }
 
-            else if (GUILayout.Button("Shader batch modify"))
+            else if (GUILayout.Button(contents[9], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (colorSelector == null)
                 {
@@ -243,7 +278,7 @@ namespace Toolkit
             }
 
 
-            else if (GUILayout.Button("Waypoint from OBJ"))
+            else if (GUILayout.Button(contents[10], GUILayout.Width(32), GUILayout.Height(32)))
             {
                 if (waypointGenerator == null)
                 {
@@ -251,6 +286,9 @@ namespace Toolkit
                 }
                 waypointGenerator.Show();
             }
+
+            GUILayout.EndVertical();
+            Handles.EndGUI();
 
         }
 

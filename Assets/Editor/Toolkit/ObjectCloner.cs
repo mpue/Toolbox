@@ -275,7 +275,7 @@ namespace Toolkit
 			if (GUI.changed && showPlacementGrid) {
 
 				if (toolbox != null) {
-					updateGrid(x_count,z_count,(int)distance, toolbox.gizmoPosition);
+					updateGrid(x_count,z_count,(int)distance, Toolbox.gizmoPosition);
 					SceneView.RepaintAll();
 				}
 
@@ -327,7 +327,7 @@ namespace Toolkit
 								toolbox = EditorWindow.GetWindow<Toolbox>();
 								if (toolbox != null)
 								{
-									current = toolbox.gizmoPosition;
+									current = Toolbox.gizmoPosition;
 								}
 								else {
 									current = original.transform.position;
@@ -596,7 +596,7 @@ namespace Toolkit
 			if ((e.type == EventType.MouseUp) && e.button == 1 && e.shift) {
 				toolbox = EditorWindow.GetWindow<Toolbox>();
 				if (showPlacementGrid && toolbox != null) {
-					updateGrid(x_count,z_count,(int)distance, toolbox.gizmoPosition);
+					updateGrid(x_count,z_count,(int)distance, Toolbox.gizmoPosition);
 					drawGrid();
 				}
 				scnView.Repaint();
@@ -613,7 +613,7 @@ namespace Toolkit
 
             if (toolbox != null && limitHeight)
             {
-                drawMaxHeight(toolbox.gizmoPosition);
+                drawMaxHeight(Toolbox.gizmoPosition);
             }
 
         }
